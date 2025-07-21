@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+
 export function Header() {
     return (
         <header className="bg-[#0F0F0F] text-white fixed top-0 left-0 w-full z-50 shadow-md">
