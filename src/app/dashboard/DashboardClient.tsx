@@ -5,12 +5,16 @@ import { FiShare } from "react-icons/fi";
 import { FaTrash } from "react-icons/fa";
 import { ChangeEvent, useState } from "react";
 import Head from "next/head";
+import db from "../../services/fireBaseConnection";
+import { addDoc, collection } from "firebase/firestore";
 
-interface DashboardClientProps {
-    session: any; 
+export interface DashboardClientProps {
+    user: {
+        email: string;
+    };
 }
 
-export default function DashboardClient({ session }: DashboardClientProps) {
+export default function DashboardClient({ user }: DashboardClientProps) {
     const [input, setInput] = useState("");
     const [publicTask, setPublicTask] = useState(false);
 
@@ -18,7 +22,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
         setPublicTask(event.target.checked);
     }
 
-    function handleRegisterTask(event: React.FormEvent) {
+    async function handleRegisterTask(event: React.FormEvent) {
         event.preventDefault();
 
         if (input.trim() === "") {
@@ -26,10 +30,20 @@ export default function DashboardClient({ session }: DashboardClientProps) {
             return;
         }
 
+        try {
+            await addDoc(collection(db, "tasks"), {
+                task: input,
+                public: publicTask,
+                created: new Date(),
+                userEmail: user.email
+            });
 
-        console.log("Tarefa registrada:", input, "Pública:", publicTask);
-        setInput("");
-        setPublicTask(false);
+            console.log("Tarefa registrada com sucesso!");
+            setInput("");
+            setPublicTask(false);
+        } catch (error) {
+            console.error("Erro ao registrar tarefa:", error);
+        }
     }
 
     return (

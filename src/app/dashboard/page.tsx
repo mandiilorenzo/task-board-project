@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import DashboardClient from "./DashboardClient"; 
+import DashboardClient from "./DashboardClient";
 import { redirect } from "next/navigation";
+
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
@@ -10,7 +11,13 @@ export default async function DashboardPage() {
         redirect("/");
     }
 
-    return <DashboardClient session={session} />;
+    return (
+        <DashboardClient
+            user={{
+                email: session.user?.email ?? "",
+            }}
+        />
+    );
 }
 
 
