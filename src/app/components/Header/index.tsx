@@ -36,14 +36,14 @@ export function Header() {
                         {status === "loading" ? null : session ? (
                             <button
                                 onClick={() => signOut()}
-                                className="text-sm border border-amber-50 rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
+                                className="text-sm border border-amber-50 cursor-pointer rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
                             >
                                 Olá, {session.user?.name?.split(" ")[0]}!
                             </button>
                         ) : (
                             <button
                                 onClick={() => signIn("google")}
-                                className="text-sm border border-amber-50 rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
+                                className="text-sm border border-amber-50 cursor-pointer rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
                             >
                                 Entrar com Google
                             </button>
