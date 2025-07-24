@@ -13,7 +13,6 @@ export function Header() {
             <div className="max-w-screen-xl mx-auto px-4  sm:px-6 py-6">
                 <nav className="flex flex-wrap items-center justify-between gap-4">
 
-                    {/* Logo + Link para Painel */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6">
                         <Link href="/">
                             <h1 className="font-bold text-2xl sm:text-3xl cursor-pointer">
@@ -31,18 +30,23 @@ export function Header() {
                         )}
                     </div>
 
-                    {/* Login / Logout */}
                     <div>
                         {status === "loading" ? null : session ? (
                             <button
-                                onClick={() => signOut()}
+                                onClick={async () => {
+                                    await signOut({
+                                        redirect: false,
+                                        callbackUrl: "/", 
+                                    });
+                                    window.location.href = "/"; 
+                                }}
                                 className="text-sm border border-amber-50 cursor-pointer rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
                             >
                                 Olá, {session.user?.name?.split(" ")[0]}!
                             </button>
                         ) : (
                             <button
-                                onClick={() => signIn("google")}
+                                onClick={() => signIn("google", { prompt: "select_account", hd: "" })}
                                 className="text-sm border border-amber-50 cursor-pointer rounded-3xl px-4 sm:px-6 py-2 transition-transform duration-300 hover:scale-105"
                             >
                                 Entrar com Google

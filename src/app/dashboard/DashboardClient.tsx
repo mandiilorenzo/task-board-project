@@ -3,10 +3,10 @@
 import { TextArea } from "@/app/components/TextArea";
 import { FiShare } from "react-icons/fi";
 import { FaTrash } from "react-icons/fa";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import Head from "next/head";
 import db from "../../services/fireBaseConnection";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, query, orderBy, where, onSnapshot } from "firebase/firestore";
 
 export interface DashboardClientProps {
     user: {
@@ -14,9 +14,44 @@ export interface DashboardClientProps {
     };
 }
 
+interface Task {
+    id: string;
+    task: string;
+    public: boolean;
+    created: Date;
+    userEmail: string;
+}
+
+
 export default function DashboardClient({ user }: DashboardClientProps) {
     const [input, setInput] = useState("");
     const [publicTask, setPublicTask] = useState(false);
+    const [tasks, setTasks] = useState<Task[]>([]);
+
+    useEffect(() => {
+        async function fetchTasks() {
+            const tasksRef = collection(db, "tasks");
+            const q = query(
+                tasksRef,
+                where("userEmail", "==", user?.email),
+                orderBy("created", "desc")
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const tasksData: Task[] = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    task: doc.data().task,
+                    public: doc.data().public,
+                    created: doc.data().created.toDate(),
+                    userEmail: doc.data().userEmail,
+                })) as Task[];
+                setTasks(tasksData);
+            });
+
+            return () => unsubscribe();
+        }
+        fetchTasks();
+    }, [user?.email]);
 
     function handleChangePublic(event: ChangeEvent<HTMLInputElement>) {
         setPublicTask(event.target.checked);
@@ -89,27 +124,35 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                 <div className="max-w-4xl mx-auto flex flex-col gap-8">
                     <h2 className="font-bold text-center text-3xl">Minhas tarefas</h2>
 
-                    <article className="flex flex-col gap-4">
-                        <div className="bg-gray-100 rounded-lg p-4 flex items-start justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-semibold text-gray-600 mb-1">
-                                    PÚBLICO
-                                </span>
-                                <p className="text-base">Minha primeira tarefa de exemplo</p>
-                            </div>
+                    {
+                        tasks.map((task) => (
+                            <article key={task.id} className="flex flex-col gap-4">
+                                <div className="bg-gray-100 rounded-lg p-4 flex items-start justify-between">
+                                    <div className="flex flex-col">
+                                        {task.public && (
+                                            <span className="text-sm font-semibold text-gray-600 mb-1">
+                                                PÚBLICO
+                                            </span>
+                                        )}
+                                        <p className="text-base">{task.task}</p>
+                                    </div>
 
-                            <div className="flex items-center gap-3 ml-4">
-                                <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
-                                    <FiShare size={20} color="#3183ff" />
-                                </button>
-                                <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
-                                    <FaTrash size={20} color="#ea3140" />
-                                </button>
-                            </div>
-                        </div>
-                    </article>
+
+
+                                    <div className="flex items-center gap-3 ml-4">
+                                        <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
+                                            <FiShare size={20} color="#3183ff" />
+                                        </button>
+                                        <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
+                                            <FaTrash size={20} color="#ea3140" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        ))
+                    }
                 </div>
             </section>
-        </main>
+        </main >
     );
 }
