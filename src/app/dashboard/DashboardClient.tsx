@@ -6,7 +6,8 @@ import { FaTrash } from "react-icons/fa";
 import { ChangeEvent, useState, useEffect } from "react";
 import Head from "next/head";
 import db from "../../services/fireBaseConnection";
-import { addDoc, collection, query, orderBy, where, onSnapshot } from "firebase/firestore";
+import { addDoc, collection, query, orderBy, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import Link from "next/link";
 
 export interface DashboardClientProps {
     user: {
@@ -81,6 +82,29 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         }
     }
 
+    async function handleShare(taskId: string) {
+        const shareUrl = `${process.env.NEXT_PUBLIC_URL}/task/${taskId}`;
+        await navigator.clipboard.writeText(shareUrl)
+            .then(() => {
+                alert("Link da tarefa copiado para a área de transferência!");
+            })
+            .catch((error) => {
+                console.error("Erro ao copiar o link:", error);
+                alert("Erro ao copiar o link. Tente novamente.");
+            });
+    }
+
+    async function handleDelete(taskId: string) {
+        const docRef = doc(db, "tasks", taskId);
+        await deleteDoc(docRef)
+            .then(() => {
+                console.log("Tarefa excluída com sucesso!");
+            })
+            .catch((error) => {
+                console.error("Erro ao excluir tarefa:", error);
+            });
+    }
+
     return (
         <main className="min-h-screen bg-[#0F0F0F] text-white pt-32">
             <Head>
@@ -134,16 +158,22 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 PÚBLICO
                                             </span>
                                         )}
-                                        <p className="text-base">{task.task}</p>
+                                        {task.public ? (
+                                            <Link href={`/task/${task.id}`}>
+                                                <p className="text-base">{task.task}</p>
+                                            </Link>
+                                        ) : (
+                                            <p className="text-base">{task.task}</p>
+                                        )}
                                     </div>
 
 
 
                                     <div className="flex items-center gap-3 ml-4">
-                                        <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
+                                        <button onClick={() => handleShare(task.id)} className="cursor-pointer transition-transform duration-300 hover:scale-105">
                                             <FiShare size={20} color="#3183ff" />
                                         </button>
-                                        <button className="cursor-pointer transition-transform duration-300 hover:scale-105">
+                                        <button onClick={() => handleDelete(task.id)} className="cursor-pointer transition-transform duration-300 hover:scale-105">
                                             <FaTrash size={20} color="#ea3140" />
                                         </button>
                                     </div>
