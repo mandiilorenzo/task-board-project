@@ -4,7 +4,7 @@ import { TextArea } from "@/app/components/TextArea";
 import { FiShare } from "react-icons/fi";
 import { FaTrash } from "react-icons/fa";
 import { ChangeEvent, useState, useEffect } from "react";
-import Head from "next/head";
+import { Metadata } from "next";
 import db from "../../services/fireBaseConnection";
 import { addDoc, collection, query, orderBy, where, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import Link from "next/link";
@@ -22,6 +22,10 @@ interface Task {
     created: Date;
     userEmail: string;
 }
+
+export const metadata: Metadata = {
+    title: "Meu painel de tarefas",
+};
 
 
 export default function DashboardClient({ user }: DashboardClientProps) {
@@ -107,10 +111,6 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
     return (
         <main className="min-h-screen bg-[#0F0F0F] text-white pt-32">
-            <Head>
-                <title>Meu painel de tarefas</title>
-            </Head>
-
             <section className="bg-black w-full h-1/2 flex justify-center items-center px-4">
                 <div className="w-full max-w-4xl flex flex-col justify-center gap-6">
                     <h1 className="text-3xl sm:text-4xl font-bold">Qual sua tarefa?</h1>
